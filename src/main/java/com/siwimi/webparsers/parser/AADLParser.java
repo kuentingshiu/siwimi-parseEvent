@@ -20,7 +20,7 @@ import com.siwimi.webparsers.domain.Location;
 import com.siwimi.webparsers.repository.ActivityRepository;
 import com.siwimi.webparsers.repository.LocationRepository;
 
-public class Parse_AADL implements Parser{
+public class AADLParser implements Parser{
 
 	@Override
 	public List<Activity> getEvents(String eventsSourceUrl, String parser, LocationRepository locationRep, ActivityRepository activityRep) {

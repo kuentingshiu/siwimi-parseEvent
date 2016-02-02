@@ -23,7 +23,8 @@ import com.siwimi.webparsers.domain.Activity.LifeStage;
 import com.siwimi.webparsers.repository.ActivityRepository;
 import com.siwimi.webparsers.repository.LocationRepository;
 
-public class Parse_Ypsilibrary implements Parser {
+
+public class YpsilibraryParser implements Parser {
 	
 	@Override
 	public List<Activity> getEvents(String eventsSourceUrl, String parser, LocationRepository locationRep, ActivityRepository activityRep) {
@@ -104,12 +105,7 @@ public class Parse_Ypsilibrary implements Parser {
 				int eventDuaration = event.getJSONObject("EventDateTime").optInt("EventDuaration");
 				String location = event.getJSONObject("Location").optString("Name",null);
 				String defaultEventHostUrl = "http://http://www.ypsilibrary.org/events";
-				
-				// eventDateTime+id is guaranteed unique, so let's check it with the database.
-				if (activityRep.isExisted(eventDateTime+id, parser)) {
-					continue;
-				}
-				
+											
 				int errorCode = 0;
 				
 				// Induce title
@@ -117,6 +113,18 @@ public class Parse_Ypsilibrary implements Parser {
 				if (title == null) {
 					errorCode += ErrorCode.NoTitle.getValue();
 				}
+	
+				// Induce custom data
+				String customData = String.valueOf(id);
+				if (eventDateTime != null)
+					customData += eventDateTime;
+				else if (title != null)
+					customData += title;
+					
+				// customData is guaranteed unique, so let's check it with the database.
+				if (activityRep.isExisted(customData, parser)) {
+					continue;
+				}	
 				
 				// Induce description
 				String description = event.optString("Description",null);
@@ -205,7 +213,7 @@ public class Parse_Ypsilibrary implements Parser {
 				Activity newEvent = new Activity();
 				newEvent.setIsDeletedRecord(false);		
 				newEvent.setCreatedDate(new Date());
-				newEvent.setCustomData(eventDateTime+id);
+				newEvent.setCustomData(customData);
 				newEvent.setParser(parser);
 				newEvent.setUrl(defaultEventHostUrl);
 				newEvent.setTitle(title);
